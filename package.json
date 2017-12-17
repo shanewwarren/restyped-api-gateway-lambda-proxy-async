@@ -1,0 +1,25 @@
+{
+    "name": "restyped-apigateway-lambda-async",
+    "version": "0.5.4",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "prepublish": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/shanewwarren/restyped-apigateway-lambda-async.git"
+    },
+    "author": "Shane Warren",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/shanewwarren/restyped-apigateway-lambda-async/issues"
+    },
+    "homepage": "https://github.com/shanewwarren/restyped-apigateway-lambda-async#readme",
+    "dependencies": {
+        "@types/aws-lambda": "0.0.24",
+        "restyped": "1.1.0"
+    }
+}

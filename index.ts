@@ -1,6 +1,7 @@
 import {RestypedBase, RestypedRoute} from 'restyped'
 import * as AwsLambda from 'aws-lambda'
 import Request from './request'
+import Response from './response'
 
 export interface TypedRequest<T extends RestypedRoute> extends Request {
   body: T['body']
@@ -23,6 +24,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
   callback: AwsLambda.ProxyCallback
 ) {
   const routeMatched = false
+
   const createAsyncRoute = function<
     Path extends keyof APIDef,
     Method extends HTTPMethod
@@ -31,10 +33,18 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     method: Method,
     handler: (
       req: TypedRequest<APIDef[Path][Method]>,
-      res: AwsLambda.ProxyCallback
+      res: Response
     ) => Promise<APIDef[Path][Method]['response']>
   ) {
-    route(path, method, handler)
+    route(
+      path,
+      method,
+      (req: TypedRequest<APIDef[Path][Method]>, res: Response) => {
+        return handler(req, res)
+          .then(result => res.send(result))
+          .catch(err => res.error(err))
+      }
+    )
   }
 
   /**
@@ -60,8 +70,8 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
   const route = function(
     path: string,
     method: HTTPMethod,
-    handler: (req: Request, res: AwsLambda.ProxyCallback) => void
-  ) {
+    handler: (req: Request, res: Response) => void
+  ): boolean {
     if (routeMatched || !routeMatcher(path, method)) {
       return false
     }
@@ -69,32 +79,9 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     this.routeMatched = true
 
     const request = new Request(this.event, this.context)
-    const instancedClass = this
-
-    const response = (error?: Error | null, result?: AwsLambda.ProxyResult) => {
-      const responseData: any = {}
-
-      responseData.statusCode = Number.isInteger(result.statusCode)
-        ? result.statusCode
-        : 200
-
-      responseData.headers =
-        typeof result.headers === 'object' ? result.headers : {}
-
-      if (result.isBase64Encoded) {
-        responseData.body = result.body || ''
-        responseData.isBase64Encoded = true
-      } else {
-        responseData.body = JSON.stringify(result.body || result)
-      }
-
-      return instancedClass.callback(
-        null,
-        responseData as AwsLambda.ProxyResult
-      )
-    }
-
-    return handler(request, response)
+    const response = new Response(this.callback)
+    handler(request, response)
+    return true
   }
 
   /**
@@ -122,7 +109,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['GET']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['GET']['response']>
     ) {
       return createAsyncRoute(path, 'GET', handler)
@@ -131,7 +118,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['POST']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['POST']['response']>
     ) {
       return createAsyncRoute(path, 'POST', handler)
@@ -140,7 +127,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['PUT']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['PUT']['response']>
     ) {
       return createAsyncRoute(path, 'PUT', handler)
@@ -149,7 +136,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['DELETE']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['DELETE']['response']>
     ) {
       return createAsyncRoute(path, 'DELETE', handler)
@@ -158,7 +145,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['PATCH']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['PATCH']['response']>
     ) {
       return createAsyncRoute(path, 'PATCH', handler)
@@ -167,7 +154,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['OPTIONS']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['OPTIONS']['response']>
     ) {
       return createAsyncRoute(path, 'OPTIONS', handler)
@@ -176,7 +163,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       path: Path,
       handler: (
         req: TypedRequest<APIDef[Path]['HEAD']>,
-        res: AwsLambda.ProxyCallback
+        res: Response
       ) => Promise<APIDef[Path]['HEAD']['response']>
     ) {
       return createAsyncRoute(path, 'HEAD', handler)

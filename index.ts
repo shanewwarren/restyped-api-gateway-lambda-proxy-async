@@ -1,5 +1,6 @@
 import {RestypedBase, RestypedRoute} from 'restyped'
 import * as AwsLambda from 'aws-lambda'
+import * as Route from 'route-parser'
 import Request from './request'
 import Response from './response'
 
@@ -21,10 +22,10 @@ type HTTPMethod =
 export default function AsyncRouter<APIDef extends RestypedBase>(
   event: AwsLambda.APIGatewayEvent,
   context: AwsLambda.APIGatewayEventRequestContext,
-  callback: AwsLambda.ProxyCallback
+  callback: AwsLambda.ProxyCallback,
+  proxyName: string = 'proxy'
 ) {
-  const routeMatched = false
-
+  let routeMatched: boolean = false
   const createAsyncRoute = function<
     Path extends keyof APIDef,
     Method extends HTTPMethod
@@ -36,71 +37,21 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       res: Response
     ) => Promise<APIDef[Path][Method]['response']>
   ) {
-    route(
-      path,
-      method,
-      (req: TypedRequest<APIDef[Path][Method]>, res: Response) => {
-        return handler(req, res)
-          .then(result => res.send(result))
-          .catch(err => res.error(err))
-      }
+    const route = new Route(path)
+    const routeParams: {[name: string]: string} | false = route.match(
+      this.event.queryStringParameters[proxyName]
     )
-  }
 
-  /**
-   * Router function. Should be called for each route you want to create.
-   *
-   * @param {Object} params
-   * Parameters object containing the route information
-   *
-   * @param {string|Array} params.method
-   * HTTP verb to create the route for.
-   *
-   * @param {string|Array} params.path
-   * The path to match the route on.
-   *
-   * @param {Callback} params.handler
-   * Function to be called when the route is matched. Should take two parameters, those being
-   * request and response.
-   *
-   * @return {Callback|boolean}
-   * Calls the handler method specified in the route information when a route matches, else returns
-   * false.
-   */
-  const route = function(
-    path: string,
-    method: HTTPMethod,
-    handler: (req: Request, res: Response) => void
-  ): boolean {
-    if (routeMatched || !routeMatcher(path, method)) {
-      return false
+    if (routeMatched || !routeParams || event.httpMethod === method) {
+      return
     }
 
-    this.routeMatched = true
-
-    const request = new Request(this.event, this.context)
-    const response = new Response(this.callback)
-    handler(request, response)
-    return true
-  }
-
-  /**
-   * Makes an attempt to match the route based on the parameters specified to the route method.
-   *
-   * @param {Object} params
-   * Parameters object containing the route information
-   *
-   * @param {string|Array} params.method
-   * HTTP verb to create the route for.
-   *
-   * @param {string|Array} params.path
-   * The path to match the route on.
-   *
-   * @return {boolean}
-   * Returns true or false depending on if the route was matched.
-   */
-  const routeMatcher = function(path: string, method: HTTPMethod): boolean {
-    return event.resource === path && event.httpMethod === method
+    routeMatched = true
+    const req = new Request(this.event, this.context, routeParams)
+    const res = new Response(this.callback)
+    handler(req, res)
+      .then(result => res.send(result))
+      .catch(err => res.error(err))
   }
 
   return {
@@ -167,6 +118,10 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       ) => Promise<APIDef[Path]['HEAD']['response']>
     ) {
       return createAsyncRoute(path, 'HEAD', handler)
+    },
+    noMatch: function() {
+      const res = new Response(this.callback)
+      res.status(404).send()
     }
   }
 }

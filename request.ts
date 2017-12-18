@@ -3,13 +3,16 @@ import * as AwsLambda from 'aws-lambda'
 export default class Request {
   private event: AwsLambda.APIGatewayEvent
   private context: AwsLambda.APIGatewayEventRequestContext
+  private routeParams: {[name: string]: string}
 
   constructor(
     event: AwsLambda.APIGatewayEvent,
-    context: AwsLambda.APIGatewayEventRequestContext
+    context: AwsLambda.APIGatewayEventRequestContext,
+    routeParams?: {[name: string]: string}
   ) {
     this.event = event
     this.context = context
+    this.routeParams = routeParams
   }
 
   /**
@@ -19,7 +22,7 @@ export default class Request {
    * An object containing all the query string parameters.
    */
   get query(): {[name: string]: string} {
-    return this.event.queryStringParameters || {}
+    return this.routeParams || this.event.queryStringParameters || {}
   }
 
   /**

@@ -37,18 +37,21 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       res: Response
     ) => Promise<APIDef[Path][Method]['response']>
   ) {
+    console.log('path: ', path, event.path)
     const route = new Route(path)
     const routeParams: {[name: string]: string} | false = route.match(
-      this.event.queryStringParameters[proxyName]
+      event.path
     )
 
-    if (routeMatched || !routeParams || event.httpMethod === method) {
+    console.log('routeParams: ', routeParams)
+
+    if (routeMatched || !routeParams || event.httpMethod !== method) {
       return
     }
 
     routeMatched = true
-    const req = new Request(this.event, this.context, routeParams)
-    const res = new Response(this.callback)
+    const req = new Request(event, context, routeParams)
+    const res = new Response(callback)
     handler(req, res)
       .then(result => res.send(result))
       .catch(err => res.error(err))
@@ -120,8 +123,10 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       return createAsyncRoute(path, 'HEAD', handler)
     },
     noMatch: function() {
-      const res = new Response(this.callback)
-      res.status(404).send()
+      if (!routeMatched) {
+        const res = new Response(callback)
+        res.status(404).send()
+      }
     }
   }
 }

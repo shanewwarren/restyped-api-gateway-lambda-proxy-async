@@ -1,4 +1,4 @@
-import {ProxyCallback} from 'aws-lambda'
+import {ProxyCallback, ProxyResult} from 'aws-lambda'
 import * as HttpStatus from 'http-status-codes'
 import HttpHeaderFields from 'http-header-fields-typed'
 
@@ -129,7 +129,7 @@ export default class Response {
 
   send(body?: any) {
     let content: string = ''
-    let responseBody: any = body || this._body
+    let responseBody: any = body || this._body || {}
 
     switch (this.get(HttpHeaderFields.CONTENT_TYPE)) {
       case 'text/plain':
@@ -143,9 +143,9 @@ export default class Response {
 
     return this._callback(null, {
       statusCode: this._statusCode,
-      header: this._headers,
+      headers: this._headers,
       isBase64Encoded: this._base64Encoded,
       body: content
-    })
+    } as ProxyResult)
   }
 }

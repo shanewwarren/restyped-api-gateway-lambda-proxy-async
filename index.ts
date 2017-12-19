@@ -35,7 +35,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     handler: (
       req: TypedRequest<APIDef[Path][Method]>,
       res: Response
-    ) => Promise<APIDef[Path][Method]['response'] | undefined>
+    ) => Promise<APIDef[Path][Method]['response'] | void>
   ) {
     console.log('path: ', path, event.path)
     const route = new Route(path)
@@ -65,7 +65,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['GET']>,
         res: Response
-      ) => Promise<APIDef[Path]['GET']['response']>
+      ) => Promise<APIDef[Path]['GET']['response'] | void>
     ) {
       return createAsyncRoute(path, 'GET', handler)
     },
@@ -74,7 +74,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['POST']>,
         res: Response
-      ) => Promise<APIDef[Path]['POST']['response']>
+      ) => Promise<APIDef[Path]['POST']['response'] | void>
     ) {
       return createAsyncRoute(path, 'POST', handler)
     },
@@ -83,7 +83,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['PUT']>,
         res: Response
-      ) => Promise<APIDef[Path]['PUT']['response']>
+      ) => Promise<APIDef[Path]['PUT']['response'] | void>
     ) {
       return createAsyncRoute(path, 'PUT', handler)
     },
@@ -92,7 +92,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['DELETE']>,
         res: Response
-      ) => Promise<APIDef[Path]['DELETE']['response']>
+      ) => Promise<APIDef[Path]['DELETE']['response'] | void>
     ) {
       return createAsyncRoute(path, 'DELETE', handler)
     },
@@ -101,7 +101,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['PATCH']>,
         res: Response
-      ) => Promise<APIDef[Path]['PATCH']['response']>
+      ) => Promise<APIDef[Path]['PATCH']['response'] | void>
     ) {
       return createAsyncRoute(path, 'PATCH', handler)
     },
@@ -110,7 +110,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['OPTIONS']>,
         res: Response
-      ) => Promise<APIDef[Path]['OPTIONS']['response']>
+      ) => Promise<APIDef[Path]['OPTIONS']['response'] | void>
     ) {
       return createAsyncRoute(path, 'OPTIONS', handler)
     },
@@ -119,7 +119,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       handler: (
         req: TypedRequest<APIDef[Path]['HEAD']>,
         res: Response
-      ) => Promise<APIDef[Path]['HEAD']['response']>
+      ) => Promise<APIDef[Path]['HEAD']['response'] | void>
     ) {
       return createAsyncRoute(path, 'HEAD', handler)
     },

@@ -3,6 +3,10 @@ import * as HttpStatus from 'http-status-codes'
 import HttpHeaderFields from 'http-header-fields-typed'
 
 export default class Response {
+  public get sent() {
+    return this._sent
+  }
+  private _sent: boolean = false
   private _callback: ProxyCallback
   private _statusCode: number
   private _base64Encoded: boolean
@@ -128,6 +132,10 @@ export default class Response {
   }
 
   send(body?: any) {
+    if (this._sent) {
+      return
+    }
+
     let content: string = ''
     let responseBody: any = body || this._body || {}
 
@@ -140,6 +148,8 @@ export default class Response {
       default:
         content = JSON.stringify(responseBody)
     }
+
+    this._sent = true
 
     return this._callback(null, {
       statusCode: this._statusCode,

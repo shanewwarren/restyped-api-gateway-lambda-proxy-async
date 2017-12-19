@@ -35,7 +35,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     handler: (
       req: TypedRequest<APIDef[Path][Method]>,
       res: Response
-    ) => Promise<APIDef[Path][Method]['response']>
+    ) => Promise<APIDef[Path][Method]['response'] | undefined>
   ) {
     console.log('path: ', path, event.path)
     const route = new Route(path)
@@ -52,6 +52,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     routeMatched = true
     const req = new Request(event, context, routeParams)
     const res = new Response(callback)
+
     handler(req, res)
       .then(result => res.send(result))
       .catch(err => res.error(err))

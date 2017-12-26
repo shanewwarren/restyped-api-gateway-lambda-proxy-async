@@ -1,30 +1,33 @@
 {
-  "name": "restyped-api-gateway-lambda-proxy-async",
-  "version": "0.0.12",
-  "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shanewwarren/restyped-api-gateway-lambda-proxy-async.git"
-  },
-  "author": "Shane Warren",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/shanewwarren/restyped-api-gateway-lambda-proxy-async/issues"
-  },
-  "homepage": "https://github.com/shanewwarren/restyped-api-gateway-lambda-proxy-async#readme",
-  "dependencies": {
-    "@types/aws-lambda": "0.0.24",
-    "@types/node": "^8.5.1",
-    "@types/route-parser": "^0.1.1",
-    "http-header-fields-typed": "^1.2.1",
-    "http-status-codes": "^1.3.0",
-    "restyped": "1.1.0",
-    "route-parser": "0.0.5"
-  }
+    "name": "restyped-api-gateway-lambda-proxy-async",
+    "version": "0.0.12",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "prepublish": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/shanewwarren/restyped-api-gateway-lambda-proxy-async.git"
+    },
+    "author": "Shane Warren",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/shanewwarren/restyped-api-gateway-lambda-proxy-async/issues"
+    },
+    "homepage": "https://github.com/shanewwarren/restyped-api-gateway-lambda-proxy-async#readme",
+    "dependencies": {
+        "@types/aws-lambda": "0.0.24",
+        "@types/node": "^8.5.1",
+        "@types/route-parser": "^0.1.1",
+        "http-header-fields-typed": "^1.2.1",
+        "http-status-codes": "^1.3.0",
+        "restyped": "1.1.0",
+        "route-parser": "0.0.5"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.2"
+    }
 }

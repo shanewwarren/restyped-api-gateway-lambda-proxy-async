@@ -10,7 +10,7 @@ export interface TypedRequest<T extends RestypedRoute> extends Request {
   query: T['query']
 }
 
-type HTTPMethod =
+export type HTTPMethod =
   | 'GET'
   | 'POST'
   | 'PUT'
@@ -19,12 +19,75 @@ type HTTPMethod =
   | 'DELETE'
   | 'OPTIONS'
 
+export interface IAsyncRouter<API extends RestypedBase> {
+  route<Path extends keyof API, Method extends HTTPMethod>(
+    path: Path,
+    method: Method,
+    handler: (
+      req: TypedRequest<API[Path][Method]>,
+      res: Response
+    ) => Promise<API[Path][Method]['response'] | void>
+  ): void
+
+  get<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['GET']>,
+      res: Response
+    ) => Promise<API[Path]['GET']['response'] | void>
+  ): void
+  post<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['POST']>,
+      res: Response
+    ) => Promise<API[Path]['POST']['response'] | void>
+  ): void
+  put<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['PUT']>,
+      res: Response
+    ) => Promise<API[Path]['PUT']['response'] | void>
+  ): void
+
+  delete<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['DELETE']>,
+      res: Response
+    ) => Promise<API[Path]['DELETE']['response'] | void>
+  ): void
+  patch<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['PATCH']>,
+      res: Response
+    ) => Promise<API[Path]['PATCH']['response'] | void>
+  ): void
+  options<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['OPTIONS']>,
+      res: Response
+    ) => Promise<API[Path]['OPTIONS']['response'] | void>
+  ): void
+  head<Path extends keyof API>(
+    path: Path,
+    handler: (
+      req: TypedRequest<API[Path]['HEAD']>,
+      res: Response
+    ) => Promise<API[Path]['HEAD']['response'] | void>
+  ): void
+  noMatch(): void
+}
+
 export default function AsyncRouter<APIDef extends RestypedBase>(
   event: AwsLambda.APIGatewayEvent,
   context: AwsLambda.APIGatewayEventRequestContext,
   callback: AwsLambda.ProxyCallback,
   proxyName: string = 'proxy'
-) {
+): IAsyncRouter<APIDef> {
   let routeMatched: boolean = false
   const createAsyncRoute = function<
     Path extends keyof APIDef,

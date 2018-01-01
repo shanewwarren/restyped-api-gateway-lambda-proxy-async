@@ -113,9 +113,11 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     }
 
     routeMatched = true
-    const req = new Request(event, context, routeParams) as TypedRequest<
-      APIDef[Path][Method]
-    >
+    const req: TypedRequest<APIDef[Path][Method]> = new Request(
+      event,
+      context,
+      routeParams
+    ) as TypedRequest<APIDef[Path][Method]>
     const res = new Response(callback)
 
     handler(req, res)

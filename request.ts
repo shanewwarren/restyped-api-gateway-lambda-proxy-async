@@ -61,8 +61,10 @@ export default class Request {
    * The lambda context object
    */
   get claims(): {[name: string]: string} {
-    return this.context.authorizer && this.context.authorizer.claims
-      ? this.context.authorizer.claims
+    return this.event.requestContext &&
+      this.event.requestContext.authorizer &&
+      this.event.requestContext.authorizer.claims
+      ? this.event.requestContext.authorizer.claims
       : {}
   }
 

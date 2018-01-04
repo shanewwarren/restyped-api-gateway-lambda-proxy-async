@@ -4,6 +4,8 @@ import * as Route from 'route-parser'
 import Request from './request'
 import Response from './response'
 
+export {Response, Request}
+
 export interface TypedRequest<T extends RestypedRoute> extends Request {
   body: T['body']
   params: T['params']

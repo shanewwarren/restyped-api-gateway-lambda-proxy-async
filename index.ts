@@ -79,7 +79,9 @@ export interface IAsyncRouter<API extends RestypedBase> {
       res: Response
     ) => Promise<API[Path]['HEAD']['response'] | void>
   ): void
-  noMatch(): void
+  wait<Path extends keyof API, Method extends HTTPMethod>(): Promise<
+    API[Path][Method]['response'] | void
+  >
 }
 
 export default function AsyncRouter<APIDef extends RestypedBase>(
@@ -89,6 +91,10 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
   proxyName: string = 'proxy'
 ): IAsyncRouter<APIDef> {
   let routeMatched: boolean = false
+  let promise: Promise<
+    APIDef[keyof APIDef][HTTPMethod]['response'] | void
+  > = null
+
   const createAsyncRoute = function<
     Path extends keyof APIDef,
     Method extends HTTPMethod
@@ -120,7 +126,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     ) as TypedRequest<APIDef[Path][Method]>
     const res = new Response(callback)
 
-    handler(req, res)
+    promise = handler(req, res)
       .then(result => res.send(result))
       .catch(err => res.error(err))
   }
@@ -190,11 +196,17 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     ) {
       return createAsyncRoute(path, 'HEAD', handler)
     },
-    noMatch: function() {
+    wait: function<
+      Path extends keyof APIDef,
+      Method extends HTTPMethod
+    >(): Promise<APIDef[Path][Method]['response'] | void> {
       if (!routeMatched) {
         const res = new Response(callback)
         res.status(404).send()
+        return Promise.resolve<void>(null)
       }
+
+      return promise
     }
   }
 }
